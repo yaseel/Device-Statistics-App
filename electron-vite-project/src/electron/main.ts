@@ -56,10 +56,19 @@ function initApp() {
 
   pollResources(mainWindow);
 
-  ipcMain.handle('getStaticData', () => {
+  handleGetStaticData(() => {
     return getStaticData();
   });
 }
+
+function handleGetStaticData(callback: () => StaticData) {
+  ipcMain.handle('getStaticData', callback)
+}
+
+
+
+
+
 
 
 app
