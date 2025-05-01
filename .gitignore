@@ -1,2 +1,4 @@
 /.idea
 /electron-vite-project/release/
+.DS_Store
+.editorconfig
