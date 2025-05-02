@@ -3,6 +3,7 @@ import { app, BrowserWindow, ipcMain } from 'electron'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import {getStaticData, pollResources} from "./resourceManager.ts";
+import {ipcMainHandle} from "./util.js";
 
 // const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -56,7 +57,7 @@ function initApp() {
 
   pollResources(mainWindow);
 
-  ipcMain.handle('getStaticData', () => {
+  ipcMainHandle('getStaticData', () => {
     return getStaticData();
   });
 }
