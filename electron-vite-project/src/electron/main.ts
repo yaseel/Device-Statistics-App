@@ -1,10 +1,8 @@
-import { app, BrowserWindow, Tray } from 'electron';
-// import { createRequire } from 'node:module'
+import { app, BrowserWindow } from 'electron';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { getStaticData, pollResources } from './resourceManager.ts';
 import { ipcMainHandle, ipcMainOn } from './util.js';
-import { getAssetPath } from './pathResolver.js';
 import { createTray } from './tray.js';
 import { createMenu } from './menu.js';
 
