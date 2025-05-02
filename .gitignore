@@ -2,3 +2,4 @@
 /electron-vite-project/release/
 .DS_Store
 .editorconfig
+electron-vite-project/.prettierrc.json
