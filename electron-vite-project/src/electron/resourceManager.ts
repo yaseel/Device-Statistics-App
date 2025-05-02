@@ -16,7 +16,6 @@ export function pollResources(mainWindow: BrowserWindow) {
             ramUsage,
             storageUsage: storageData.usage,
         });
-        console.log({ cpuUsage, ramUsage, storageUsage: storageData.usage });
     }, POLLING_INTERVAL);
 }
 
