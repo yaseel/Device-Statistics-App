@@ -16,6 +16,8 @@
     "recharts": "^2.15.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.52.0",
+    "@types/node": "^22.15.3",
     "@types/os-utils": "^0.0.4",
     "@types/react": "^18.2.64",
     "@types/react-dom": "^18.2.21",
