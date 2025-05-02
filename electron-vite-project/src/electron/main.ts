@@ -1,125 +1,93 @@
-import { app, BrowserWindow } from 'electron';
-import { fileURLToPath } from 'node:url';
-import path from 'node:path';
-import { getStaticData, pollResources } from './resourceManager.ts';
-import { ipcMainHandle, ipcMainOn } from './util.js';
-import { createTray } from './tray.js';
-import { createMenu } from './menu.js';
+import {app, BrowserWindow} from 'electron'
+import path from 'node:path'
+import {fileURLToPath} from 'node:url'
+import {getAssetPath} from './pathResolver.js'
+import {getStaticData, pollResources} from './resourceManager.js'
+import {ipcMainHandle, ipcMainOn, isDev} from './util.js'
+import {createTray} from './tray.js'
 
-// const require = createRequire(import.meta.url)
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+ipcMainHandle('getStaticData', () => getStaticData())
+ipcMainOn('sendFrameAction', (action) => {
+    const win = BrowserWindow.getAllWindows()[0]
+    if (!win) return
+    switch (action) {
+        case 'CLOSE':
+            win.close()
+            break
+        case 'MINIMIZE':
+            win.minimize()
+            break
+        case 'MAXIMIZE':
+            win.maximize()
+            break
+    }
+})
 
-// The built directory structure
-//
-// ├─┬─┬ dist
-// │ │ └── index.html
-// │ │
-// │ ├─┬ dist-electron
-// │ │ ├── main.js
-// │ │ └── preload.mjs
-// │
-process.env.APP_ROOT = path.join(__dirname, '..');
-
-// 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
-export const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL'];
-export const MAIN_DIST = path.join(process.env.APP_ROOT, 'dist-electron');
-export const RENDERER_DIST = path.join(process.env.APP_ROOT, 'dist');
-
-process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL
-    ? path.join(process.env.APP_ROOT, 'public')
-    : RENDERER_DIST;
-
-let win: BrowserWindow | null;
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 function createWindow(): BrowserWindow {
-    win = new BrowserWindow({
-        icon: path.join(process.env.VITE_PUBLIC, 'electron-vite.svg'),
+    const win = new BrowserWindow({
+        icon: path.join(getAssetPath(), 'appicon.png'),
         webPreferences: {
             preload: path.join(__dirname, 'preload.mjs'),
+            contextIsolation: true,
+            nodeIntegration: false,
         },
-    });
+    })
 
-    // Test active push message to Renderer-process.
-    win.webContents.on('did-finish-load', () => {
-        win?.webContents.send('main-process-message', new Date().toLocaleString());
-    });
-
-    if (VITE_DEV_SERVER_URL) {
-        win.loadURL(VITE_DEV_SERVER_URL);
+    if (isDev() && process.env['VITE_DEV_SERVER_URL']) {
+        win.loadURL(process.env['VITE_DEV_SERVER_URL']!)
     } else {
-        // win.loadFile('dist/index.html')
-        win.loadFile(path.join(RENDERER_DIST, 'index.html'));
+        win.loadFile(path.join(__dirname, '../dist/index.html'))
     }
 
-    return win;
+    if (isDev()) {
+        win.webContents.openDevTools({mode: 'detach'})
+    }
+
+    win.webContents.on('did-finish-load', () => {
+        win.webContents.send('main-process-message', new Date().toLocaleString())
+    })
+
+    return win
+}
+
+function setupCloseBehavior(win: BrowserWindow) {
+    let quitting = false
+
+    win.on('close', (e) => {
+        if (!quitting) {
+            e.preventDefault()
+            win.hide()
+            app.dock?.hide()
+        }
+    })
+
+    app.on('before-quit', () => {
+        quitting = true
+    })
+
+    win.on('show', () => {
+        quitting = false
+    })
 }
 
 function initApp() {
-    const mainWindow = createWindow();
-
-    pollResources(mainWindow);
-
-    ipcMainHandle('getStaticData', () => {
-        return getStaticData();
-    });
-
-    ipcMainOn('sendFrameAction', (payload) => {
-        switch (payload) {
-            case 'CLOSE':
-                mainWindow.close();
-                break;
-            case 'MINIMIZE':
-                mainWindow.minimize();
-                break;
-            case 'MAXIMIZE':
-                mainWindow.maximize();
-                break;
-        }
-    });
-
-    createTray(mainWindow);
-    handleCloseEvents(mainWindow);
-    createMenu(mainWindow);
+    const mainWindow = createWindow()
+    pollResources(mainWindow)
+    createTray(mainWindow)
+    setupCloseBehavior(mainWindow)
 }
 
-function handleCloseEvents(mainWindow: BrowserWindow) {
-    let willClose = false;
-
-    mainWindow.on('close', (e) => {
-        if (willClose) {
-            return;
-        }
-
-        e.preventDefault();
-        mainWindow.hide();
-        if (app.dock) {
-            app.dock.hide();
-        }
-    });
-
-    app.on('before-quit', () => {
-        willClose = true;
-    });
-
-    mainWindow.on('show', () => {
-        willClose = false;
-    });
-}
-
-app.whenReady()
+app
+    .whenReady()
     .then(initApp)
-    .catch((err) => console.error(err));
+    .catch(console.error)
 
 app.on('window-all-closed', () => {
-    if (process.platform !== 'darwin') {
-        app.quit();
-    }
-});
+    if (process.platform !== 'darwin') app.quit()
+})
 
 app.on('activate', () => {
-    // On OS X it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) {
-        initApp();
-    }
-});
+    if (BrowserWindow.getAllWindows().length === 0) initApp()
+})

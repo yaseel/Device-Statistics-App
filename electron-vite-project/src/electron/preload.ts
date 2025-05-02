@@ -1,36 +1,45 @@
-import electron from 'electron';
+import {contextBridge, ipcRenderer, IpcRendererEvent} from 'electron'
 
-electron.contextBridge.exposeInMainWorld('electron', {
-  subscribeStatistics: (callback) =>
-    ipcOn('statistics', (stats) => {
-      callback(stats);
-    }),
-  subscribeChangeView: (callback) =>
-    ipcOn('changeView', (view) => {
-      callback(view);
-    }),
-  getStaticData: () => ipcInvoke('getStaticData'),
-  sendFrameAction: (payload) => ipcSend('sendFrameAction', payload),
-} satisfies Window['electron']);
+contextBridge.exposeInMainWorld(
+    'electron',
+    {
+        subscribeStatistics: (
+            callback: (stats: Statistics) => void
+        ): UnsubscribeFunction => {
+            const listener = (
+                _evt: IpcRendererEvent,
+                stats: EventPayloadMapping['statistics']
+            ) => {
+                callback(stats)
+            }
+            ipcRenderer.on('statistics', listener)
+            return () => {
+                ipcRenderer.off('statistics', listener)
+            }
+        },
 
-function ipcInvoke<Key extends keyof EventPayloadMapping>(
-    key: Key
-): Promise<EventPayloadMapping[Key]> {
-  return electron.ipcRenderer.invoke(key);
-}
+        getStaticData: (): Promise<StaticData> =>
+            ipcRenderer.invoke('getStaticData'),
 
-function ipcOn<Key extends keyof EventPayloadMapping>(
-    key: Key,
-    callback: (payload: EventPayloadMapping[Key]) => void
-) {
-  const cb = (_: Electron.IpcRendererEvent, payload: any) => callback(payload);
-  electron.ipcRenderer.on(key, (_, payload) => callback(payload));
-  return () => electron.ipcRenderer.off(key, cb);
-}
+        subscribeChangeView: (
+            callback: (view: View) => void
+        ): UnsubscribeFunction => {
+            const listener = (
+                _evt: IpcRendererEvent,
+                view: EventPayloadMapping['changeView']
+            ) => {
+                callback(view)
+            }
+            ipcRenderer.on('changeView', listener)
+            return () => {
+                ipcRenderer.off('changeView', listener)
+            }
+        },
 
-function ipcSend<Key extends keyof EventPayloadMapping>(
-    key: Key,
-    payload: EventPayloadMapping[Key]
-) {
-  electron.ipcRenderer.send(key, payload);
-}
+        sendFrameAction: (
+            payload: FrameWindowAction
+        ): void => {
+            ipcRenderer.send('sendFrameAction', payload)
+        }
+    } satisfies Window['electron']
+)

@@ -1,9 +1,9 @@
 // @see - https://www.electron.build/configuration/configuration
 {
   "$schema": "https://raw.githubusercontent.com/electron-userland/electron-builder/master/packages/app-builder-lib/scheme.json",
-  "appId": "com.yaseel.electron-react-app",
+  "appId": "com.yaseel.Device-Statistics",
   "asar": true,
-  "productName": "Demo Electron React JS App",
+  "productName": "Device Statistics",
   "directories": {
     "output": "release/${version}"
   },
@@ -11,14 +11,25 @@
     "dist",
     "dist-electron"
   ],
-  extraResources: ["src/assets/**"],
+  "asarUnpack": [
+    "dist-electron/preload.mjs"
+  ],
+  "extraResources": [
+    {
+      "from": "src/ui/assets",
+      "to": "assets",
+      "filter": ["**/*"]
+    }
+  ],
   "mac": {
+    icon:  "src/ui/assets/appicon.png",
     "target": [
       "dmg"
     ],
     "artifactName": "${productName}-Mac-${version}-Installer.${ext}"
   },
   "win": {
+    icon: "src/ui/assets/appicon.png",
     "target": [
       {
         "target": "nsis",
@@ -36,6 +47,7 @@
     "deleteAppDataOnUninstall": false
   },
   "linux": {
+    icon: "src/ui/assets/appicon.png",
     "target": [
       "AppImage"
     ],
