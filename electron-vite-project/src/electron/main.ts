@@ -1,9 +1,10 @@
-import { app, BrowserWindow, ipcMain } from 'electron'
+import { app, BrowserWindow, Tray } from 'electron'
 // import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import {getStaticData, pollResources} from "./resourceManager.ts";
 import {ipcMainHandle} from "./util.js";
+import {getAssetPath} from "./pathResolver.js";
 
 // const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -60,7 +61,13 @@ function initApp() {
   ipcMainHandle('getStaticData', () => {
     return getStaticData();
   });
+
+  new Tray(path.join(getAssetPath(), process.platform === 'darwin' ? 'trayIconTemplate.png' : 'trayIcon.png'));
 }
+
+
+
+
 
 
 app
