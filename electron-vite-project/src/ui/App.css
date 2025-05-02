@@ -4,7 +4,9 @@
   gap: 1rem;
   align-items: center;
   max-width: 900px;
-  margin: 4rem auto auto;
+  margin: 4rem auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
 }
 
 .mainGrid {
@@ -28,6 +30,7 @@
 
 .selectOptionTitle {
   display: flex;
+  align-items: center;
   gap: 1rem;
 }
 
