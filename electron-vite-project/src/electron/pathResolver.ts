@@ -16,10 +16,8 @@ export function getAssetPath(): string {
 
 export function getUIPath(): string {
     if (isDev()) {
-        // dev: Vite HMR server
         return process.env.VITE_DEV_SERVER_URL!
     } else {
-        // prod: app.getAppPath() returns ".../Resources/app.asar"
         const appAsarPath = app.getAppPath()
         const indexHtml = path.join(appAsarPath, 'dist', 'index.html')
         return pathToFileURL(indexHtml).toString()
