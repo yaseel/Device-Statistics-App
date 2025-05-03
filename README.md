@@ -5,8 +5,8 @@ static device info.
 
 ## Download
 
-- **Windows (x64)**: [Download `.exe`]()
-- **macOS**: [Download `.dmg`]()
+- **Windows (x64)**: [Download `.exe`](https://github.com/yaseel/Device-Statistics-App/releases/download/v1.0.0/Device.Statistics-Windows-1.0.0-Setup.exe)
+- **macOS**: [Download `.dmg`](https://github.com/yaseel/Device-Statistics-App/releases/download/v1.0.0/Device.Statistics-Mac-1.0.0-Installer.dmg)
 
 ## Features
 
