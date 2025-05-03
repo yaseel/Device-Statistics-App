@@ -3,6 +3,8 @@
 A lightweight, cross‑platform desktop utility that shows your machine’s CPU, RAM and storage usage in real time — plus
 static device info.
 
+![Preview screenshot](https://github.com/yaseel/Device-Statistics-App/blob/main/electron-vite-project/public/app_preview.png)
+
 ## Download
 
 - **Windows (x64)**: [Download `.exe`](https://github.com/yaseel/Device-Statistics-App/releases/download/v1.0.0/Device.Statistics-Windows-1.0.0-Setup.exe)
