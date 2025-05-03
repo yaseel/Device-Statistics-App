@@ -7,7 +7,6 @@ static device info.
 
 - **Windows (x64)**: [Download `.exe`]()
 - **macOS**: [Download `.dmg`]()
-- **Linux**: [Download `.AppImage`]()
 
 ## Features
 
