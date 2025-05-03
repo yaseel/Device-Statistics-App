@@ -1,12 +1,12 @@
+import {app} from 'electron'
 import path from 'node:path'
-import {fileURLToPath} from 'node:url'
+import {fileURLToPath, pathToFileURL} from 'node:url'
 import {dirname} from 'node:path'
 import {isDev} from './util.js'
-import {pathToFileURL} from "url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 
-export function getAssetPath() {
+export function getAssetPath(): string {
     if (isDev()) {
         return path.join(__dirname, '..', 'src', 'ui', 'assets')
     } else {
@@ -16,9 +16,12 @@ export function getAssetPath() {
 
 export function getUIPath(): string {
     if (isDev()) {
+        // dev: Vite HMR server
         return process.env.VITE_DEV_SERVER_URL!
     } else {
-        const indexHtml = path.join(process.resourcesPath, 'dist', 'index.html')
+        // prod: app.getAppPath() returns ".../Resources/app.asar"
+        const appAsarPath = app.getAppPath()
+        const indexHtml = path.join(appAsarPath, 'dist', 'index.html')
         return pathToFileURL(indexHtml).toString()
     }
 }
